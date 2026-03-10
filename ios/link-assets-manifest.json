@@ -1,0 +1,37 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "../src/assets/fonts/PlusJakartaDisplay-Bold.otf",
+      "sha1": "ad8ca1718d41e44e161d57ab3b4a85c5d55d7a2b"
+    },
+    {
+      "path": "../src/assets/fonts/PlusJakartaDisplay-BoldItalic.otf",
+      "sha1": "5e4f920e2aefc36cabef7264dcb9d5da01207e53"
+    },
+    {
+      "path": "../src/assets/fonts/PlusJakartaDisplay-Italic.otf",
+      "sha1": "c6099d26861d4317e5598e68e392ba382dcac433"
+    },
+    {
+      "path": "../src/assets/fonts/PlusJakartaDisplay-Light.otf",
+      "sha1": "60d85c1ab501bb375f90cf212d9a10d2bd20cefc"
+    },
+    {
+      "path": "../src/assets/fonts/PlusJakartaDisplay-LightItalic.otf",
+      "sha1": "5d368db3e36c25d8d31b0db7b6522a3c810a8753"
+    },
+    {
+      "path": "../src/assets/fonts/PlusJakartaDisplay-Medium.otf",
+      "sha1": "18e180287341978598ee5bee1e46f952fa1c60e7"
+    },
+    {
+      "path": "../src/assets/fonts/PlusJakartaDisplay-MediumItalic.otf",
+      "sha1": "13ec8ba66f406c2826f0094cb6ec0f6a049bc4bc"
+    },
+    {
+      "path": "../src/assets/fonts/PlusJakartaDisplay-Regular.otf",
+      "sha1": "f251a231440f7b301263a572049ae379f53822ff"
+    }
+  ]
+}
