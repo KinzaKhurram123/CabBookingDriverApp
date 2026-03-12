@@ -130,14 +130,6 @@ const CustomButton = props => {
 
   const renderContent = () => (
     <>
-      {loader && (
-        <ActivityIndicator
-          style={styles.indicatorStyle}
-          size="small"
-          color={loaderColor || buttonColors.text}
-        />
-      )}
-
       {iconIsImage && (
         <View style={styles.iconImageContainer}>
           {image && (
@@ -158,22 +150,29 @@ const CustomButton = props => {
           style={[styles.icon, iconStyle]}
         />
       )}
-
-      <CustomText
-        style={[
-          styles.text,
-          textstyle,
-          {
-            color: buttonColors.text,
-            fontSize: fontSize || SIZES.h13,
-          },
-          textTransform && {textTransform: textTransform},
-          disabled && {opacity: 0.6},
-          btn_style,
-        ]}
-        isBold={isBold}>
-        {text}
-      </CustomText>
+      {loader ? (
+        <ActivityIndicator
+          style={styles.indicatorStyle}
+          size="small"
+          color={loaderColor || buttonColors.text}
+        />
+      ) : (
+        <CustomText
+          style={[
+            styles.text,
+            textstyle,
+            {
+              color: buttonColors.text,
+              fontSize: fontSize || SIZES.h13,
+            },
+            textTransform && {textTransform: textTransform},
+            disabled && {opacity: 0.6},
+            btn_style,
+          ]}
+          isBold={isBold}>
+          {text}
+        </CustomText>
+      )}
     </>
   );
 

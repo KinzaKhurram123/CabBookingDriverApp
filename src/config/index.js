@@ -1,5 +1,5 @@
-// export const baseUrl = 'https://e6fd-103-138-50-45.ngrok-free.app';
-export const baseUrl = 'https://car-rental.cstmpanel.com';
+export const baseUrl = 'https://krystal-imaginable-hurtlingly.ngrok-free.dev';
+// export const baseUrl = 'https://car-rental.cstmpanel.com';
 export const imageUrl = `${baseUrl}/api/images/`;
 export const profilePicUrl = `${baseUrl}/uploads`;
 export const GoogleApiKey = 'AIzaSyDn4KET0DRdrsheEaBflpAee9U1zYRQ_kY';

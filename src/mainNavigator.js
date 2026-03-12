@@ -22,11 +22,13 @@ const Stack = createNativeStackNavigator();
 
 const MainNavigator = () => {
   const riderMode = useSelector(state => state?.commonReducer?.riderMode);
-
+  const token = useSelector(state => state.authReducer.token);
+  const firstScreen = token ? 'DrawerNavigators' : 'LoginScreen';
+  console.log(token, '================>token');
   return (
     <NavigationContainer ref={navigationServices.navigationRef}>
       <Stack.Navigator
-        initialRouteName={'LoginScreen'}
+        initialRouteName={firstScreen}
         screenOptions={{headerShown: false}}>
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="ChooseVechicle" component={ChooseVechicle} />

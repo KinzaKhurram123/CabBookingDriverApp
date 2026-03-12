@@ -1,17 +1,16 @@
 // screens/rider/RiderEditProfile.js
-import {Icon, theme} from 'native-base';
-import React, {useState} from 'react';
+import {Icon} from 'native-base';
+import React, {useState, useEffect} from 'react';
 import {
   ScrollView,
   StyleSheet,
   Switch,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {moderateScale} from 'react-native-size-matters';
-import Entypo from 'react-native-vector-icons/Entypo';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Images from '../assests/Appimages';
 import CustomButton from '../component/customButton';
@@ -22,31 +21,38 @@ import TextInputWithTitle from '../component/textInputWithTitle';
 import {FONTS, SIZES} from '../constant/sizes';
 import {useTheme} from '../context/ThemeContext';
 import {windowWidth} from '../utility/utils';
+import {useDispatch, useSelector} from 'react-redux';
+import {onPressEditProfile} from '../apisConfig/auth';
 
 const RiderEditProfile = () => {
   const {theme} = useTheme();
+  const {token} = useSelector(state => state.authReducer);
+  const userData = useSelector(state => state.commonReducer.userData);
+  const dispatch = useDispatch();
   const [profileImage, setProfileImage] = useState(Images.driver1);
   const [vehicleImage, setVehicleImage] = useState(Images.carimage);
   const [isOnline, setIsOnline] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [vehicleTypeItems, setVehicleTypeItems] = useState([
+    {label: 'Sedan', value: 'sedan'},
+    {label: 'Hatchback', value: 'hatchback'},
+    {label: 'SUV', value: 'suv'},
+    {label: 'Minivan', value: 'minivan'},
+  ]);
+  console.log(userData, 'userData');
   const [formData, setFormData] = useState({
-    fullName: 'Michael Chen',
-    email: 'michael.chen@driver.com',
-    phone: '+1 234 567 8900',
-    address: '456 Oak Avenue, Los Angeles, CA 90001',
-    city: 'Los Angeles',
-    state: 'CA',
-    zipCode: '90001',
-    dateOfBirth: '1985-06-20',
-
+    name: userData?.name,
+    email: userData?.email,
+    phoneNumber: userData?.phone,
+    vehicleType: 'sedan',
+    vehicleNumber: 'ABC-1234',
     licenseNumber: 'DL-12345678',
-    licenseExpiry: '2025-12-31',
-    insuranceProvider: 'SafeDrive Insurance',
-    insurancePolicy: 'POL-987654321',
-    vehicleModel: 'Toyota Camry',
-    vehicleYear: '2022',
-    vehicleColor: 'Silver',
-    vehiclePlate: 'ABC-1234',
-    vehicleMake: 'Toyota',
+    make: 'Toyota',
+    model: 'Camry',
+    year: '2022',
+    color: 'Silver',
+    licensePlate: 'ABC-1234',
   });
 
   const handleImagePick = setter => {
@@ -126,8 +132,8 @@ const RiderEditProfile = () => {
           <TextInputWithTitle
             title="Full Name"
             placeholder="Enter your full name"
-            value={formData.fullName}
-            setText={text => updateField('fullName', text)}
+            value={formData.name}
+            setText={text => updateField('name', text)}
             viewHeight={0.075}
             viewWidth={0.93}
             inputWidth={0.93}
@@ -169,8 +175,8 @@ const RiderEditProfile = () => {
           <TextInputWithTitle
             title="Phone Number"
             placeholder="Enter your phone number"
-            value={formData.phone}
-            setText={text => updateField('phone', text)}
+            value={formData.phoneNumber}
+            setText={text => updateField('phoneNumber', text)}
             viewHeight={0.075}
             viewWidth={0.93}
             inputWidth={0.93}
@@ -189,13 +195,8 @@ const RiderEditProfile = () => {
           />
         </View>
 
-        <View
-          style={[
-            styles.section,
-            {
-              borderRadius: moderateScale(10, 0.6),
-            },
-          ]}>
+        {/* Driver License Information */}
+        <View style={styles.section}>
           <CustomText isBold style={[styles.sectionTitle, {color: theme.text}]}>
             Driver License Information
           </CustomText>
@@ -203,7 +204,7 @@ const RiderEditProfile = () => {
           <View style={styles.rowInputs}>
             <View style={styles.halfInput}>
               <TextInputWithTitle
-                title="License Number"
+                title="License Number" // ✅ Maps to licenseNumber
                 placeholder="License #"
                 value={formData.licenseNumber}
                 setText={text => updateField('licenseNumber', text)}
@@ -225,10 +226,10 @@ const RiderEditProfile = () => {
             </View>
             <View style={styles.halfInput}>
               <TextInputWithTitle
-                title="Expiry Date"
-                placeholder="YYYY-MM-DD"
-                value={formData.licenseExpiry}
-                setText={text => updateField('licenseExpiry', text)}
+                title="Vehicle Number" // ✅ Maps to vehicleNumber
+                placeholder="Vehicle #"
+                value={formData.vehicleNumber}
+                setText={text => updateField('vehicleNumber', text)}
                 viewHeight={0.075}
                 viewWidth={0.43}
                 inputWidth={0.4}
@@ -246,54 +247,18 @@ const RiderEditProfile = () => {
               />
             </View>
           </View>
-
-          <TextInputWithTitle
-            title="Insurance Provider"
-            placeholder="Insurance company"
-            value={formData.insuranceProvider}
-            setText={text => updateField('insuranceProvider', text)}
-            viewHeight={0.075}
-            viewWidth={0.92}
-            inputWidth={0.92}
-            fontSize={SIZES.h12}
-            borderRadius={10}
-            backgroundColor={theme.card}
-            marginTop={SIZES.h10}
-            placeholderColor={theme.mediumGray}
-            borderColor={theme.primary}
-            inputStyle={{
-              borderBottomWidth: 2,
-              borderBottomColor: theme.border,
-            }}
-            titleStyle={{color: theme.text}}
-          />
-
-          <TextInputWithTitle
-            title="Policy Number"
-            placeholder="Insurance policy #"
-            value={formData.insurancePolicy}
-            setText={text => updateField('insurancePolicy', text)}
-            viewHeight={0.075}
-            viewWidth={0.92}
-            inputWidth={0.92}
-            fontSize={SIZES.h12}
-            borderRadius={10}
-            backgroundColor={theme.card}
-            marginTop={SIZES.h10}
-            placeholderColor={theme.mediumGray}
-            borderColor={theme.primary}
-            inputStyle={{
-              borderBottomWidth: 2,
-              borderBottomColor: theme.border,
-            }}
-            titleStyle={{color: theme.text}}
-          />
         </View>
 
         <View style={styles.section}>
           <CustomText isBold style={[styles.sectionTitle, {color: theme.text}]}>
             Vehicle Information
           </CustomText>
+
+          <View style={{marginBottom: SIZES.base, zIndex: 1000}}>
+            <CustomText style={[styles.vehicleLabel, {color: theme.darkGray}]}>
+              Vehicle Type *
+            </CustomText>
+          </View>
 
           <View style={styles.vehicleImageSection}>
             <CustomText style={[styles.vehicleLabel, {color: theme.darkGray}]}>
@@ -323,8 +288,8 @@ const RiderEditProfile = () => {
               <TextInputWithTitle
                 title="Make"
                 placeholder="e.g., Toyota"
-                value={formData.vehicleMake}
-                setText={text => updateField('vehicleMake', text)}
+                value={formData.make}
+                setText={text => updateField('make', text)}
                 viewHeight={0.075}
                 viewWidth={0.42}
                 inputWidth={0.42}
@@ -345,8 +310,8 @@ const RiderEditProfile = () => {
               <TextInputWithTitle
                 title="Model"
                 placeholder="e.g., Camry"
-                value={formData.vehicleModel}
-                setText={text => updateField('vehicleModel', text)}
+                value={formData.model}
+                setText={text => updateField('model', text)}
                 viewHeight={0.075}
                 viewWidth={0.42}
                 inputWidth={0.42}
@@ -370,8 +335,8 @@ const RiderEditProfile = () => {
               <TextInputWithTitle
                 title="Year"
                 placeholder="2022"
-                value={formData.vehicleYear}
-                setText={text => updateField('vehicleYear', text)}
+                value={formData.year?.toString()}
+                setText={text => updateField('year', text)}
                 viewHeight={0.075}
                 viewWidth={0.42}
                 inputWidth={0.42}
@@ -393,8 +358,8 @@ const RiderEditProfile = () => {
               <TextInputWithTitle
                 title="Color"
                 placeholder="Silver"
-                value={formData.vehicleColor}
-                setText={text => updateField('vehicleColor', text)}
+                value={formData.color}
+                setText={text => updateField('color', text)}
                 viewHeight={0.075}
                 viewWidth={0.42}
                 inputWidth={0.42}
@@ -416,8 +381,8 @@ const RiderEditProfile = () => {
           <TextInputWithTitle
             title="License Plate"
             placeholder="ABC-1234"
-            value={formData.vehiclePlate}
-            setText={text => updateField('vehiclePlate', text)}
+            value={formData.licensePlate}
+            setText={text => updateField('licensePlate', text)}
             viewHeight={0.075}
             viewWidth={0.92}
             inputWidth={0.92}
@@ -436,8 +401,11 @@ const RiderEditProfile = () => {
         </View>
 
         <CustomButton
-          text="Update Profile"
-          onPress={() => console.log('Rider profile updated:', formData)}
+          text={loading ? 'Updating...' : 'Update Profile'}
+          onPress={() =>
+            onPressEditProfile({setLoading, formData, dispatch, token})
+          }
+          disabled={loading}
           textColor={theme.white}
           width={SIZES.windowWidth * 0.9}
           height={SIZES.windowHeight * 0.07}
@@ -455,6 +423,7 @@ const RiderEditProfile = () => {
   );
 };
 
+// Styles remain the same as your original...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -511,14 +480,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imageHint: {
-    ...FONTS.Regular11,
-    marginTop: moderateScale(5, 0.6),
-  },
   section: {
     width: windowWidth * 0.93,
     marginBottom: SIZES.padding,
     alignSelf: 'center',
+    zIndex: 1,
   },
   sectionTitle: {
     ...FONTS.Bold18,
@@ -559,27 +525,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  docItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: moderateScale(12, 0.6),
-    borderRadius: moderateScale(8, 0.6),
-    marginBottom: moderateScale(8, 0.6),
-  },
-  docLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  docInfo: {
-    marginLeft: moderateScale(10, 0.6),
-  },
-  docName: {
-    ...FONTS.Medium13,
-  },
-  docStatus: {
-    ...FONTS.Regular11,
   },
 });
 

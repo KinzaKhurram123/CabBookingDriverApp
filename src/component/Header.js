@@ -1,6 +1,6 @@
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Icon} from 'native-base';
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Alert, Platform, StyleSheet, ToastAndroid, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
@@ -13,6 +13,9 @@ import {FONTS, SIZES} from '../constant/sizes';
 import navigationServices from '../navigator/navigationServices';
 import {moderateScale} from 'react-native-size-matters';
 import {useTheme} from '../context/ThemeContext';
+import Geolocation from 'react-native-geolocation-service';
+import {updateLocation} from '../apisConfig/bookings';
+import {GoogleApiKey} from '../config';
 
 const Header = props => {
   const {theme} = useTheme();
@@ -40,7 +43,7 @@ const Header = props => {
     iconColor,
     isborder = true,
   } = props;
-
+  const isFocused = useIsFocused();
   const [searchText, setSearchText] = useState('');
   const user_type = useSelector(state => state.authReducer.user_type);
   const user = useSelector(state => state.commonReducer.userData);
@@ -48,6 +51,13 @@ const Header = props => {
   const token = useSelector(state => state.authReducer.token);
   const [currentPossition, setcurrentPossition] = useState({});
   const [time, setTime] = useState(0);
+  const locationIntervalRef = useRef(null);
+  const [currentPosition, setCurrentPosition] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+  const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
   const statusArray = [
     {label: 'Change Password', value: 'ChangePassword'},
     {label: 'Terms & Conditions', value: 'TermsAndConditions'},
@@ -77,6 +87,112 @@ const Header = props => {
       return titleColor;
     }
     return theme.text;
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      // Initial location fetch and update
+      handleLocationUpdate();
+
+      // Start interval
+      startLocationUpdates();
+    }
+
+    return () => {
+      stopLocationUpdates();
+    };
+  }, [isFocused]);
+
+  const handleLocationUpdate = async () => {
+    if (currentPosition) {
+      await updateLocation({
+        setLoading,
+        latitude: currentPosition.latitude,
+        longitude: currentPosition.longitude,
+        dispatch,
+        token,
+      });
+    }
+  };
+
+  const startLocationUpdates = () => {
+    if (locationIntervalRef.current) {
+      clearInterval(locationIntervalRef.current);
+    }
+    locationIntervalRef.current = setInterval(() => {
+      console.log('⏰ Running 10-min location update...');
+      handleLocationUpdate();
+    }, 600000);
+  };
+
+  const getCurrentLocation = async () => {
+    try {
+      const position = await new Promise((resolve, reject) => {
+        Geolocation.getCurrentPosition(
+          position => {
+            const coords = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              timestamp: position.timestamp,
+            };
+
+            console.log(
+              '📍 New location:',
+              coords.latitude,
+              coords.longitude,
+              'at',
+              new Date().toLocaleTimeString(),
+            );
+
+            getAddressFromCoordinates(
+              position.coords.latitude,
+              position.coords.longitude,
+            );
+
+            resolve(coords);
+          },
+          error => {
+            console.error('Location error:', error);
+            reject(error);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+          },
+        );
+      });
+
+      setCurrentPosition(position);
+      return position;
+    } catch (error) {
+      console.error('Error in getCurrentLocation:', error);
+      return null;
+    }
+  };
+
+  const stopLocationUpdates = () => {
+    if (locationIntervalRef.current) {
+      clearInterval(locationIntervalRef.current);
+      locationIntervalRef.current = null;
+      console.log('🛑 Location updates stopped');
+    }
+  };
+
+  const getAddressFromCoordinates = async (latitude, longitude) => {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GoogleApiKey}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.status === 'OK') {
+        const givenaddress = data.results[0].formatted_address;
+        setAddress(givenaddress);
+      } else {
+        console.log('No address found');
+      }
+    } catch (error) {
+      console.error('--------------------------------- error', error);
+    }
   };
 
   const renderLeftIcon = () => (

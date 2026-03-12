@@ -10,9 +10,17 @@ import {FONTS, SIZES} from '../constant/sizes';
 import navigationServices from '../navigator/navigationServices';
 import {windowWidth} from '../utility/utils';
 import {useTheme} from '../context/ThemeContext';
+import {useState} from 'react';
+import {onPressLogin} from '../apisConfig/auth';
+import {useDispatch} from 'react-redux';
 
 const LoginScreen = () => {
   const {theme} = useTheme();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+
   return (
     <ScrollView
       contentContainerStyle={styles.scrollContainer}
@@ -51,6 +59,8 @@ const LoginScreen = () => {
             Sign In To Your Existing Account
           </CustomText>
           <TextInputWithTitle
+            value={email}
+            setText={setEmail}
             title={'Email Address :'}
             placeholder={'Enter Your Email Address'}
             viewHeight={0.075}
@@ -68,7 +78,8 @@ const LoginScreen = () => {
             }}
           />
           <TextInputWithTitle
-            titleText={'Username'}
+            value={password}
+            setText={setPassword}
             title={'Password :'}
             placeholder={'Enter Your Password :'}
             viewHeight={0.075}
@@ -77,6 +88,7 @@ const LoginScreen = () => {
             borderColor={theme.secondary}
             fontSize={SIZES.h14}
             borderRadius={10}
+            secureText
             backgroundColor={'rgba(230, 232, 230,0.6)'}
             marginTop={SIZES.h10}
             placeholderColor={Colors.mediumGray}
@@ -101,7 +113,17 @@ const LoginScreen = () => {
             isBold
             isGradient
             elevation
-            onPress={() => navigationServices.navigate('DrawerNavigators')}
+            loader={loading}
+            onPress={() =>
+              onPressLogin({
+                setLoading,
+                body: {
+                  email: email,
+                  password: password,
+                },
+                dispatch,
+              })
+            }
           />
           <View
             style={[

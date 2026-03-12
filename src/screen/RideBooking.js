@@ -54,32 +54,6 @@ const RideBooking = () => {
   useEffect(() => {
     getCurrentLocation();
   }, [isFocused]);
-
-  useEffect(() => {
-    const watchId = Geolocation.watchPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setCurrentPosition(prevLocation => ({
-          ...prevLocation,
-          latitude,
-          longitude,
-        }));
-
-        const distance = getDistance(currentPosition, destination);
-        setIsNearDestination(distance <= 20);
-      },
-      error => console.log('Error getting location:', error),
-      {
-        enableHighAccuracy: true,
-        distanceFilter: 1,
-        interval: 1000,
-      },
-    );
-    return () => {
-      Geolocation.clearWatch(watchId);
-    };
-  }, [isFocused]);
-
   const getCurrentLocation = async () => {
     try {
       const position = await new Promise((resolve, reject) => {
@@ -116,6 +90,31 @@ const RideBooking = () => {
       throw error;
     }
   };
+
+  useEffect(() => {
+    const watchId = Geolocation.watchPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setCurrentPosition(prevLocation => ({
+          ...prevLocation,
+          latitude,
+          longitude,
+        }));
+
+        const distance = getDistance(currentPosition, destination);
+        setIsNearDestination(distance <= 20);
+      },
+      error => console.log('Error getting location:', error),
+      {
+        enableHighAccuracy: true,
+        distanceFilter: 1,
+        interval: 1000,
+      },
+    );
+    return () => {
+      Geolocation.clearWatch(watchId);
+    };
+  }, [isFocused]);
 
   useEffect(() => {
     if (isValidCoordinate(currentPosition)) {

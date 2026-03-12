@@ -1,25 +1,27 @@
-import {FlatList, ScrollView, StyleSheet, View} from 'react-native';
+import moment from 'moment';
 import {Icon} from 'native-base';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import {FlatList, ScrollView, StyleSheet, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {moderateScale} from 'react-native-size-matters';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import moment from 'moment';
-import Header from '../component/Header';
-import CustomText from '../component/customText';
-import CustomImage from '../component/customImage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Images from '../assests/Appimages';
-import {windowHeight, windowWidth} from '../utility/utils';
-import {moderateScale} from 'react-native-size-matters';
-import Colors from '../config/appTheme';
-import {FONTS, SIZES} from '../constant/sizes';
-import {rideRequests} from '../constant/arrays';
+import Header from '../component/Header';
+import CustomImage from '../component/customImage';
+import CustomText from '../component/customText';
 import RideRequestCard from '../component/rideRequestCard';
+import {rideRequests} from '../constant/arrays';
+import {FONTS} from '../constant/sizes';
 import {useTheme} from '../context/ThemeContext';
+import {windowHeight, windowWidth} from '../utility/utils';
+import {useIsFocused} from '@react-navigation/native';
+import Geolocation from 'react-native-geolocation-service';
 
-const DashBoardScreen = () => {
+const DashBoardScreen = () => {  
   const {theme} = useTheme();
+  const isFocused = useIsFocused();
   const today_date = Date.now();
 
   const CardView = () => {
